@@ -1,0 +1,122 @@
+<%- include('./partials/head.ejs') %>
+  <div class="wrapper">
+    <%- include('./partials/sidebar.ejs') %>
+      <div class="main">
+        <%- include('./partials/header.ejs') %>
+      </div>
+      <div class="content">
+        <div class="main-head">
+          <h3 class="line">
+            <%= pageTitle %>
+          </h3>
+
+          <div class="row">
+            <div class="col">
+              <div class="dropdown">
+                <select class="form-select" style="border: 1px solid #6c757d;" name="group" id="group" disabled>
+                  <option selected>-- Select Group --</option>
+                </select>
+              </div>
+            </div>
+            <div class="col">
+              <div class="dropdown">
+                <select class="form-select" style="border: 1px solid #6c757d;" name="level" id="level">
+                  <option selected>-- Select Level --</option>
+                  <option value="First">First Level</option>
+                  <option value="Second">Second Level</option>
+                  <option value="Third">Third Level</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" id="csrf">
+
+
+        <div class="main-body">
+          <div class="row row-cols-1 row-cols-md-4 g-4" id="attendanceBody">
+
+          </div>
+
+        </div>
+      </div>
+  </div>
+
+
+  <%- include('./partials/end.ejs') %>
+
+
+    <script>
+      $(document).ready(function () {
+        var groupID = '', token = '';
+        $("#level").change(function () {
+          var val = $(this).val();
+          token = $('#csrf').val();
+          $.ajax({
+            type: 'POST',
+            url: '/get-group-level',
+            data: {
+              level: val,
+              '_csrf': token,
+            },
+            success: function (data) {
+              $('#group').prop('disabled', false);
+              document.getElementById('group').innerHTML = '<option value="">-- Select an option --</option>'
+              data.forEach(element => {
+                var select = document.getElementById('group')
+                var opt = document.createElement('option')
+                opt.value = element._id
+                opt.innerHTML = `${element.name} FROM ${element.start} TO ${element.end} IN ${element.day}`
+                select.appendChild(opt)
+              });
+            }
+          })
+        });
+        $("#group").change(function () {
+          $("#attendanceBody").empty()
+          groupID = $(this).val();
+          token = $('#csrf').val();
+          $.ajax({
+            type: 'POST',
+            url: '/get-group-attendance',
+            data: {
+              groupID,
+              '_csrf': token,
+            },
+            success: function () {
+            }
+          }).done(function (data) {
+            var card = '';
+            data.forEach(item => {
+              card = `           
+              <div class="col"  id="${item._id}">
+                <div class="card" style="width: 19rem; height: 8rem;">
+                  <div class="card-body">
+                    <h4 class="card-title mb-3">${item.createdAt}</h4>
+                    <div class="row">
+                      <div class="col">
+                        <span class="card-subtitle mb-2 text-muted">
+                          <i class="fa-solid fa-user-group"></i>
+                          Students: ${item.studentsNumber}
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <a href="/attendance-student/${item._id}" title="view Attendance">
+                      <button class="btn-sm btn-custom me-2 mt-1" style="position: absolute; right: 5px;">Details</button>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>`
+              $("#attendanceBody").append(card)
+            })
+          })
+        })
+
+      })
+    </script>
+    </body>
+
+    </html>

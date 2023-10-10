@@ -1,0 +1,132 @@
+<%- include('./partials/head.ejs') %>
+  </head>
+
+  <body>
+    <div class="wrapper">
+      <%- include('./partials/sidebar.ejs') %>
+        <div class="main">
+          <%- include('./partials/header.ejs') %>
+        </div>
+        <div class="content">
+          <div class="main-head">
+            <h3 class="line">
+              <%= pageTitle %>
+            </h3>
+            <div class="dropdown" style="width: 12rem;">
+              <select class="form-select" style="border: 1px solid #6c757d;">
+                <option selected>-- Select Group --</option>
+              </select>
+            </div>
+          </div>
+          <div class="main-body">
+            <% if (groups.length> 0) { %>
+              <div class="row row-cols-1 row-cols-md-3 g-4">
+                <% for( let group of groups) { %>
+                  <div class="col">
+                    <div class="card" style="width: 21.5rem; height: 8rem;">
+                      <div class="card-overlay d-flex justify-content-around">
+                        <div class="icon-text edit-icon">
+                          <a href="/edit-group/<%= group._id %>" class="btn" title="Edit Group">
+                            <i class="fa-regular fa-eye d-block"></i>
+                            <span class="">Preview & Edit</span>
+                          </a>
+
+                        </div>
+                        <div class="icon-text delete-icon">
+
+                          <form role="form" action="/delete-group" method="POST" id="delete-form"
+                            style="display: inline-block !important;" onsubmit="return submitForm(this);">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>" id="csrf">
+                            <input type="hidden" name="groupId" value="<%= group._id %>" id="groupId">
+                            <i class="fa-regular fa-trash-can d-block"></i>
+                            <button type="submit" class="btn"
+                              style="margin-left: 0; background-color: transparent; color: black; border: transparent; padding: 0;">Delete</button>
+                          </form>
+                        </div>
+                      </div>
+                      <div class="card-body">
+                        <h4 class="card-title mb-3">
+                          <%= group.name %>
+                        </h4>
+                        <div class="row row-cols-2">
+                          <div class="col">
+                            <span class="card-subtitle text-muted">
+                              <i class="fa-regular fa-clock"></i>
+                              From: <%= group.start %>
+                            </span>
+                          </div>
+                          <div class="col">
+                            <span class="card-subtitle text-muted">
+                              <i class="fa-regular fa-clock"></i>
+                              To: <%= group.end %>
+                            </span>
+                          </div>
+                          <div class="col">
+                            <span class="card-subtitle mb-2 text-muted">
+                              <i class="fa-solid fa-user-group"></i>
+                              Students: <%= group.students %>
+                            </span>
+                          </div>
+                          <div class="col">
+                            <span class="card-subtitle mb-2 text-muted">
+                              <i class="fa-regular fa-calendar"></i>
+                              Day: <%= group.day %>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <% } %>
+              </div>
+              <% } %>
+          </div>
+        </div>
+        <%- include('./partials/end.ejs') %>
+          <script>
+            function submitForm(form) {
+              Swal.fire({
+                title: "Are you sure?",
+                text: "This group will be deleted",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: 'Delete',
+                confirmButtonColor: '#FF5856',
+              })
+                .then(function (res) {
+                  var frm = $(form)
+                  if (res.isConfirmed) {
+                    $.ajax({
+                      type: 'POST',
+                      url: '/delete-group',
+                      data: frm.serialize(),
+                      success: function (data) {
+                      }
+                    }).done(function (data) {
+                      Swal.fire({
+                        title: data,
+                        icon: 'success',
+                        confirmButtonColor: '#FF5856',
+                      }).then(function (response) {
+                        if (response.isConfirmed) {
+                          window.location.reload()
+                        }
+                      })
+                    })
+                      .fail(function (data) {
+                        Swal.fire({
+                          title: "Group can't deleted",
+                          text: 'There are students in this group',
+                          icon: 'error',
+                          confirmButtonColor: '#FF5856',
+                        })
+                      })
+                  }
+                });
+              return false;
+            }
+
+          </script>
+  </body>
+
+  </html>

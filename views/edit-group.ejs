@@ -1,0 +1,146 @@
+<%- include('./partials/head.ejs') %>
+  <div class="wrapper">
+    <%- include('./partials/sidebar.ejs') %>
+      <div class="main">
+        <%- include('./partials/header.ejs') %>
+      </div>
+      <div class="content">
+        <div class="main-head">
+          <h3 class="line">
+            <%= pageTitle %>
+          </h3>
+        </div>
+
+        <div class="main-body">
+          <form role="form" action="/edit-group" method="POST">
+
+            <input type="hidden" name="groupId" value="<%= group._id %>">
+
+            <div class="row">
+              <div class="col-md-4 mb-2 has-validation">
+                <label for="name" class="form-label">Group Name:</label>
+                <input type="text"
+                  class="form-control <%= validationErrors.find(e => e.path === 'name') ? 'is-invalid' : '' %>"
+                  placeholder="Group Name" id="name" name="name" value="<%= group.name %>" required>
+                <div class="invalid-feedback">
+                  <%= validationErrors.find(e=> e.path === 'name') ? 'Please choose a valid name' : '' %>
+                </div>
+              </div>
+              <div class="col-md-4 mb-2 has-validation">
+                <label for="level" class="form-label">Level:</label>
+                <select id="level"
+                  class="form-control custom-select <%= validationErrors.find(e => e.param === 'level') ? 'is-invalid' : '' %>"
+                  name="level">
+                  <option value="First" <%=(group.level==='First' ) ? 'selected' : '' %>>First Level</option>
+                  <option value="Second" <%=(group.level==='Second' ) ? 'selected' : '' %>>Second Level</option>
+                  <option value="Third" <%=(group.level==='Third' ) ? 'selected' : '' %>>Third Level</option>
+                </select>
+              </div>
+
+              <div class="col-md-4 mb-2 has-validation">
+                <label for="day" class="form-label">Day:</label>
+                <select id="select-country"
+                  class="form-control custom-select <%= validationErrors.find(e => e.param === 'day') ? 'is-invalid' : '' %>"
+                  name="day">
+                  <option value="7" <%=(group.day==='Saturday' ) ? 'selected' : '' %>>Saturday</option>
+                  <option value="1" <%=(group.day==='Sunday' ) ? 'selected' : '' %>>Sunday</option>
+                  <option value="2" <%=(group.day==='Monday' ) ? 'selected' : '' %>>Monday</option>
+                  <option value="3" <%=(group.day==='Tuesday' ) ? 'selected' : '' %>>Tuesday</option>
+                  <option value="4" <%=(group.day==='Wednesday' ) ? 'selected' : '' %>>Wednesday</option>
+                  <option value="5" <%=(group.day==='Thursday' ) ? 'selected' : '' %>>Thursday</option>
+                  <option value="6" <%=(group.day==='Friday' ) ? 'selected' : '' %>>Friday</option>
+                </select>
+              </div>
+            </div>
+            <div class="row mb-4">
+              <div class="col-md-6 has-validation">
+                <label for="time" class="form-label">Start At:</label>
+                <input type="time"
+                  class="form-control <%= validationErrors.find(e => e.path === 'start') ? 'is-invalid' : '' %>"
+                  placeholder="Start Time" id="start" name="start" value="<%= group.start %>" required>
+                <div class="invalid-feedback">
+                  <%= validationErrors.find(e=> e.path === 'start') ? 'Please choose a valid date' : '' %>
+                </div>
+              </div>
+              <div class="col-md-6 has-validation">
+                <label for="time" class="form-label">End At:</label>
+                <input type="time"
+                  class="form-control <%= validationErrors.find(e => e.path === 'end') ? 'is-invalid' : '' %>"
+                  placeholder="End Time" id="end" name="end" value="<%= group.end %>" required>
+                <div class="invalid-feedback">
+                  <%= validationErrors.find(e=> e.path === 'end') ? 'Please choose a valid date' : '' %>
+                </div>
+              </div>
+            </div>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+
+            <button type="submit" class="btn btn-custom" style="width: 150px; margin-left: 0;">Edit</button>
+          </form>
+
+          <table class="table table-hover" id="data-table">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Parent Phone</th>
+                <th scope="col">Balance</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <% if (students.length> 0) { %>
+              <tbody class="">
+                <% for( let [i, student] of students.entries()) { %>
+                  <tr>
+                    <td>
+                      <%= i+1 %>
+                    </td>
+                    <td>
+                      <%= student.name %>
+                    </td>
+                    <td>
+                      <%= student.phone %>
+                    </td>
+                    <td>
+                      <%= student.parent %>
+                    </td>
+                    <td>
+                      <%= student.balance %>
+                    </td>
+                    <td>
+                      <a href="/edit-student/<%= student._id %>" class="btn btn-info btn-sm" title="Edit Student">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                    </td>
+                  </tr>
+                  <% } %>
+              </tbody>
+              <% } %>
+
+          </table>
+        </div>
+      </div>
+  </div>
+
+  <%- include('./partials/end.ejs') %>
+
+    <script src="/js/datatables.min.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        $('#data-table').DataTable({
+          "bLengthChange": false,
+          "pageLength": 8,
+          language: {
+            'paginate': {
+              'previous': '<span class="fa fa-chevron-left"></span>',
+              'next': '<span class="fa fa-chevron-right"></span>'
+            },
+          }
+        });
+      });
+    </script>
+    </body>
+
+    </html>

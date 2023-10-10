@@ -1,0 +1,105 @@
+<div class="left-sidebar">
+  <div class="head">
+    <i class="fas fa-chalkboard-teacher"></i>
+    <div class="user-details">
+      <p class="name">Alaa Nabil</p>
+      <p class="title">Arabic Teacher</p>
+    </div>
+  </div>
+  <div class="nav">
+    <div class="menu">
+      <ul>
+        <li>
+          <a class="<%= path === '/home' ? 'active': '' %>" href="/home">
+            <i class="fas fa-home icon"></i>
+            <span class="text">Home</span>
+          </a>
+        </li>
+        <li class="<%= path === '/add-student' ? 'active' : '' %>">
+          <a href="/add-student" class="">
+            <i class="fas fa-user-plus icon"></i>
+            <span class="text">Add Student</span>
+          </a>
+        </li>
+        <li class="<%= path.includes('/view-students/') ? 'active' : '' %>">
+          <a href="#">
+            <i class="fas fa-users icon"></i>
+            <span class="text">My Students</span>
+            <i class="fa fa-angle-down arrow"></i>
+          </a>
+          <ul class="sub-menu">
+            <li class="<%= path === '/view-students/First' ? 'active' : '' %>">
+              <a href="/view-students/First">
+                <span class="text">First</span>
+              </a>
+            </li>
+            <li class="<%= path === '/view-students/Second' ? 'active' : '' %>">
+              <a href="/view-students/Second">
+                <span class="text">Second</span>
+              </a>
+            </li>
+            <li class="<%= path === '/view-students/Third' ? 'active' : '' %>">
+              <a href="/view-students/Third">
+                <span class="text">Third</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="<%= path === '/add-group' ? 'active' : '' %>">
+          <a href="/add-group">
+            <i class="fas fa-user-plus icon"></i>
+            <span class="text">Add Group</span>
+          </a>
+        </li>
+
+        <li class="<%= path.includes('/view-groups/') ? 'active' : '' %>">
+          <a href="#">
+            <i class="fas fa-users icon"></i>
+            <span class="text">My Groups</span>
+            <i class="fa fa-angle-down arrow"></i>
+          </a>
+          <ul class="sub-menu">
+            <li class="<%= path === '/view-groups/First' ? 'active' : '' %>">
+              <a href="/view-groups/First">
+                <span class="text">First Level</span>
+              </a>
+            </li>
+            <li class="<%= path === '/view-groups/Second' ? 'active' : '' %>">
+              <a href="/view-groups/Second">
+                <span class="text">Second Level</span>
+              </a>
+            </li>
+            <li class="<%= path === '/view-groups/Third' ? 'active' : '' %>">
+              <a href="/view-groups/Third">
+                <span class="text">Third Level</span>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="<%= path === '/take-attendance' ? 'active' : '' %>">
+          <a href="/take-attendance">
+            <i class="fa-solid fa-list-check"></i>
+            <span class="text">Take Attendance</span>
+          </a>
+        </li>
+        <li class="<%= path === '/view-attendance' ? 'active' : '' %>">
+          <a href="/view-attendance">
+            <i class="fas fa-calendar-alt icon"></i>
+            <span class="text">VIew Attendance</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="menu">
+    <ul>
+      <li class="logout">
+        <a href="#">
+          <i class="fas fa-sign-out-alt icon"></i>
+          <span>Logout</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+</div>

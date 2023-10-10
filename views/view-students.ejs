@@ -1,0 +1,119 @@
+<%- include('./partials/head.ejs') %>
+ <link rel="stylesheet" href="/css/buttons.dataTables.min.css">
+  </head>
+
+  <body>
+    <div class="wrapper">
+      <%- include('./partials/sidebar.ejs') %>
+        <div class="main">
+          <%- include('./partials/header.ejs') %>
+        </div>
+        <div class="content">
+          <div class="main-head">
+            <h3 class="line">
+              <%= pageTitle %>
+            </h3>
+          </div>
+          <div class="main-body">
+            <% if (students.length> 0) { %>
+              <table class="table table-hover" id="data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Phone</th>
+                    <th scope="col">Parent Phone</th>
+                    <th scope="col">Group</th>
+                    <th scope="col">Balance</th>
+                    <th scope="col"></th>
+                  </tr>
+                </thead>
+                <tbody class="">
+                  <% for( let [i, student] of students.entries()) { %>
+                    <tr>
+                      <td>
+                        <%= i+1 %>
+                      </td>
+                      <td>
+                        <%= student.name %>
+                      </td>
+                      <td>
+                        <%= student.phone %>
+                      </td>
+                      <td>
+                        <%= student.parent %>
+                      </td>
+                      <td>
+                        <%= student.group.name %>
+                      </td>
+                      <td>
+                        <%= student.balance %>
+                      </td>
+                      <td>
+                        <a href="" class="btn-secondary btn btn-sm" title="Print Barcode">
+                          <i class="fa-solid fa-print"></i>
+                        </a>
+                        <form role="form" action="/delete-student" method="POST"
+                          style="display: inline-block !important;" onsubmit="return submitForm(this);">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                          <input type="hidden" name="studentId" value="<%= student._id %>">
+                          <button type="submit" class="btn btn-danger btn-sm" style="margin-left: 0;"><i
+                              class="fas fa-trash"></i></button>
+                        </form>
+                        <a href="/edit-student/<%= student._id %>" class="btn btn-info btn-sm" title="Edit Student">
+                          <i class="fas fa-edit"></i>
+                        </a>
+                      </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+              </table>
+              <% } %>
+          </div>
+        </div>
+        <%- include('./partials/end.ejs') %>
+          <script src="/js/datatables.min.js"></script>
+          <script src="/js/dataTables.buttons.min.js"></script>
+          <script src="/js/buttons.html5.min.js"></script>
+          <script src="/js/jszip.min.js"></script>
+          <script>
+            $(document).ready(function () {
+              $('#data-table').DataTable({
+                "bLengthChange": false,
+                "pageLength": 9,
+                language: {
+                  'paginate': {
+                    'previous': '<span class="fa fa-chevron-left"></span>',
+                    'next': '<span class="fa fa-chevron-right"></span>'
+                  },
+                },
+                dom: 'Bfrtip',
+                buttons: [
+                  'excelHtml5',
+                ]
+              });
+            });
+          </script>
+
+          <script>
+            function submitForm(form) {
+              Swal.fire({
+                title: "Are you sure?",
+                text: "This student will be deleted",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                confirmButtonColor: '#FF5856',
+              })
+                .then(function (res) {
+                  console.log(res);
+                  if (res.isConfirmed) {
+                    form.submit();
+                  }
+                });
+              return false;
+            }
+          </script>
+  </body>
+
+  </html>

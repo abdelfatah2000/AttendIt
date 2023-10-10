@@ -1,0 +1,216 @@
+<%- include('./partials/head.ejs') %>
+  <div class="wrapper">
+    <%- include('./partials/sidebar.ejs') %>
+      <div class="main">
+        <%- include('./partials/header.ejs') %>
+      </div>
+      <div class="content">
+        <div class="main-head">
+          <h3 class="line">
+            <%= pageTitle %>
+          </h3>
+        </div>
+
+        <div class="main-body">
+          <div class="mb-4">
+            <form role="form" action="/edit-student" method="POST">
+
+              <input type="hidden" name="studentId" value="<%= student._id %>" id="studentID">
+
+
+              <div class="row mb-1">
+                <div class="col-4 has-validation">
+                  <label for="name" class="form-label">Student Name</label>
+                  <input type="text"
+                    class="form-control <%= validationErrors.find(e => e.path === 'name') ? 'is-invalid' : '' %>"
+                    placeholder="Student Name" id="name" name="name" value="<%= student.name%>">
+                  <div class="invalid-feedback">
+                    <%= validationErrors.find(e=> e.path === 'name') ? errors.name.msg : '' %>
+                  </div>
+                </div>
+
+                <div class="col-4 has-validation">
+                  <label for="balance" class="form-label">Student Balance</label>
+                  <input type="number"
+                    class="form-control <%= validationErrors.find(e => e.path === 'balance') ? 'is-invalid' : '' %>"
+                    placeholder="Student Balance" id="balance" name="balance" value="<%= student.balance%>">
+                  <div class="invalid-feedback">
+                    <%= validationErrors.find(e=> e.path === 'balance') ? errors.balance.msg : '' %>
+                  </div>
+                </div>
+
+                <div class="col-4 has-validation">
+                  <label for="level" class="form-label">Level</label>
+                  <select id="level"
+                    class="form-control custom-select <%= validationErrors.find(e => e.param === 'level') ? 'is-invalid' : '' %>"
+                    name="level">
+                    <option value="">-- Select an option --</option>
+                    <option value="First" <%=(student.level==='First' ) ? 'selected' : '' %> >First Level</option>
+                    <option value="Second" <%=(student.level==='Second' ) ? 'selected' : '' %>>Second Level</option>
+                    <option value="Third" <%=(student.level==='Third' ) ? 'selected' : '' %>>Third Level</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row mb-1">
+                <div class="col-4 has-validation">
+                  <label for="phone" class="form-label">Phone</label>
+                  <input type="text"
+                    class="form-control <%= validationErrors.find(e => e.path === 'phone') ? 'is-invalid' : '' %>"
+                    placeholder="Phone Number" id="phone" name="phone" value="<%= student.phone %>">
+                  <div class="invalid-feedback">
+                    <%= validationErrors.find(e=> e.path === 'phone') ? errors.phone.msg : '' %>
+                  </div>
+                </div>
+                <div class="col-4 has-validation">
+                  <label for="parent" class="form-label">Parent Phone</label>
+                  <input type="text"
+                    class="form-control <%= validationErrors.find(e => e.path === 'parent') ? 'is-invalid' : '' %>"
+                    placeholder="Enter Parent Phone" id="parent" name="parent" value="<%= student.parent %>">
+                  <div class="invalid-feedback">
+                    <%= validationErrors.find(e=> e.path === 'parent') ? errors.parent.msg : '' %>
+                  </div>
+                </div>
+
+                <div class="col-4 has-validation">
+                  <label for="group" class="form-label">Group</label>
+                  <select id="group" class="form-control custom-select" name="group">
+                    <option value="">-- Select an option --</option>
+                    <% for( let group of groups) { var selected=(group._id.equals(student.group)) ? 'selected' : '' ; %>
+                      <option value="<%= group._id %>" <%=selected %>><%= group.name %> FROM <%= group.start %> TO <%=
+                              group.end %>
+                              IN
+                              <%= group.day %>
+                      </option>
+                      <% } %>
+                  </select>
+                </div>
+              </div>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" id="csrf">
+              <button type="submit" class="btn btn-custom" style="width: 150px; margin-left: 0; margin-top: 20px;">Edit
+              </button>
+            </form>
+          </div>
+          <div class="row row-cols-1 row-cols-md-4 g-4" id="attendanceBody">
+
+          </div>
+        </div>
+
+      </div>
+  </div>
+  <%- include('./partials/end.ejs') %>
+    <script>
+      $(":input").keypress(function (event) {
+        if (event.which == '10' || event.which == '13') {
+          event.preventDefault();
+        }
+      });
+      $(document).ready(function () {
+        var token, studentID;
+        $("#level").change(function () {
+          var val = $(this).val();
+          token = $('#csrf').val();
+          var data = {
+            level: val,
+            '_csrf': token,
+          }
+          $.ajax({
+            type: 'POST',
+            url: '/get-group-level',
+            data: data,
+            success: function (data) {
+              document.getElementById('group').innerHTML = '<option value="">-- Select an option --</option>'
+              data.forEach(element => {
+                var select = document.getElementById('group')
+                var opt = document.createElement('option')
+                opt.value = element._id
+                opt.innerHTML = `${element.name} FROM ${element.start} TO ${element.end} IN ${element.day}`
+                select.appendChild(opt)
+              });
+            }
+          })
+        });
+        token = $('#csrf').val();
+        studentID = document.getElementById("studentID").value;
+        $.ajax({
+          type: 'POST',
+          url: '/student-attendance',
+          data: {
+            "_csrf": token,
+            "studentID": studentID,
+          },
+          success: function (data) {
+            console.log(data)
+            var card;
+            data.forEach(item => {
+              if (item.status === 'absence') {
+                card = `<div class="col">
+                          <div class="card absence-card" style="width: 21rem; height: 6.4rem;">
+                            <div class="card-body">
+                              <div class="row justify-content-between">
+                                <div class="col">
+                                  <h4 class="card-title mb-3">${item.createdAt}</h4>
+                                </div>
+                                <div class="col">
+                                  <span class="absence-span">Absence</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>`
+                $("#attendanceBody").append(card)
+              } else {
+                card = `<div class="col">
+                          <div class="card present-card" style="width: 21rem; height: 6.4rem;">
+                            <div class="card-body">
+                              <div class="row justify-content-between">
+                                <div class="col">
+                                  <h4 class="card-title mb-3">${item.createdAt}</h4>
+                                </div>
+                                <div class="col">
+                                  <span class="present-span">Present</span>
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col">
+                                  <span class="card-subtitle mb-2 text-muted">
+                                    <i class="fa-regular fa-clock"></i>
+                                    Time: ${item.time}
+                                  </span>
+                                </div>
+                                <div class="col">
+                                  <span class="card-subtitle mb-2 text-muted">
+                                    <i class="fa-solid fa-user-group"></i>
+                                    Group: ${item.group}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>`
+                $("#attendanceBody").append(card)
+              }
+            })
+          }
+        })
+      });
+
+      // function ImageToPrint(source) {
+      //   return "<html><head><scri" + "pt>function step1(){\n" +
+      //     "setTimeout('step2()', 10);}\n" +
+      //     "function step2(){window.print();window.close()}\n" +
+      //     "</scri" + "pt></head><body onload='step1()'>\n" +
+      //     "<img src='" + source + "' /></body></html>";
+      // }
+
+      // function PrintImage(source) {
+      //   var Pagelink = "about:blank";
+      //   var pwa = window.open(Pagelink, "_new");
+      //   pwa.document.open();
+      //   pwa.document.write(ImageToPrint(source));
+      //   pwa.document.close();
+      // }
+
+    </script>
+    </body>
+
+    </html>

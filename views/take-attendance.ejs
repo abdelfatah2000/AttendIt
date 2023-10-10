@@ -1,0 +1,268 @@
+<%- include('./partials/head.ejs') %>
+  <div class="wrapper">
+    <%- include('./partials/sidebar.ejs') %>
+      <div class="main">
+        <%- include('./partials/header.ejs') %>
+      </div>
+      <div class="content">
+        <div class="main-head">
+          <h3 class="line">
+            <%= pageTitle %>
+          </h3>
+
+
+          <div class="row">
+            <div class="col">
+              <div class="dropdown">
+                <select class="form-select" style="border: 1px solid #6c757d;" name="group" id="group" disabled>
+                  <option selected>-- Select Group --</option>
+                </select>
+              </div>
+            </div>
+            <div class="col">
+              <div class="dropdown">
+                <select class="form-select" style="border: 1px solid #6c757d;" name="level" id="level">
+                  <option selected>-- Select Level --</option>
+                  <option value="First">First Level</option>
+                  <option value="Second">Second Level</option>
+                  <option value="Third">Third Level</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-body">
+          <div class="hidden w-25 float-end" id="searchBox">
+            <div class="input-group md-form form-sm form-2 pl-0 w-100">
+              <input class="form-control my-0 py-1 amber-border" type="text" placeholder="Search" aria-label="Search"
+                id="search" list="datalistOptions" autocomplete="off" onkeyup="searchData(this)">
+              <div class="input-group-append">
+                <span class="input-group-text amber lighten-3" id="basic-text1"><i class="fas fa-search text-grey"
+                    aria-hidden="true"></i></span>
+              </div>
+            </div>
+            <div class="list-group position-absolute hidden" style="width: 24%;" id="searchResult">
+            </div>
+
+          </div>
+          <form action="/take-attendance" method="POST" role="form" class="hidden" id="attendanceForm">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" id="csrf">
+
+            <table class="table" id="studentData">
+              <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col">Phone</th>
+                  <th scope="col">Group</th>
+                  <th scope="col">Balance</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+            <button type="submit" class="btn btn-custom" style="width: 150px; margin-left: 0; margin-top: 20px;"
+              id="submitBtn">Take
+              Attendance</button>
+          </form>
+        </div>
+      </div>
+  </div>
+
+
+  <%- include('./partials/end.ejs') %>
+
+    <script>
+      var groupID = '', studentsID = [], attendanceGroup = '', barcode = '';
+
+      $(document).ready(function () {
+        $("#level").change(function () {
+          var val = $(this).val();
+          var token = $('#csrf').val();
+          var data = {
+            level: val,
+            '_csrf': token,
+          }
+          $.ajax({
+            type: 'POST',
+            url: '/get-group-level',
+            data: data,
+            success: function (data) {
+              $('#group').prop('disabled', false);
+              document.getElementById('group').innerHTML = '<option value="">-- Select an option --</option>'
+              data.forEach(element => {
+                var select = document.getElementById('group')
+                var opt = document.createElement('option')
+                opt.value = element._id
+                opt.innerHTML = `${element.name} FROM ${element.start} TO ${element.end} IN ${element.day}`
+                select.appendChild(opt)
+              });
+            }
+          })
+        });
+        $("#group").change(function () {
+          groupID = $(this).val();
+          const studentForm = document.querySelector("#attendanceForm");
+          const searchBar = document.querySelector("#searchBox");
+          studentForm.classList.remove("hidden")
+          searchBar.classList.remove("hidden")
+          $('#studentData > tbody > tr').remove();
+          studentsID = []
+        })
+
+      })
+
+      function getStudent(barcode, token) {
+        let duplicatePhone;
+        $.ajax({
+          url: '/get-student',
+          type: 'POST',
+          data: {
+            id: barcode,
+            "_csrf": token,
+          },
+          success: function (data) {
+            duplicatePhone = studentsID.find(obj => obj.studentId === data._id)
+            if (!duplicatePhone) {
+              var row = '';
+              row = `<tr id = ${data._id}> <td>${data.name}</td> <td>${data.phone}</td> <td>${data.group.name}</td> <td>${data.balance}</td> <td><i class="fas fa-trash" style="cursor:pointer; color: red"
+                      id="deleteBtn"></i> <i class="fa-solid fa-coins" style="margin-left:10px; color:green; cursor:pointer" id="balanceBtn"></i></td></tr>`
+              $("#studentData tbody").append(row)
+              studentsID.push({
+                studentId: data._id,
+                attendanceAt: new Date().toISOString(),
+                attendanceGroup: groupID,
+              })
+            }
+          }
+        })
+      }
+
+      function searchData(e) {
+        let searchResult = document.getElementById('searchResult')
+        let option;
+        $("#searchResult").empty()
+        fetch('/search-student', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ payload: e.value, '_csrf': $('#csrf').val(), level: $("#level").val() })
+        }).then(res => res.json()).then(data => {
+          searchResult.classList.remove("hidden")
+          data.forEach(item => {
+            console.log(item)
+            option = `<button type="button" onClick="addSearchStudent(this.id)" class="list-group-item list-group-item-action" id="${item._id}" aria-current="true">
+                ${item.name}
+              </button>`
+            $("#searchResult").append(option)
+          })
+        })
+      }
+
+      function addSearchStudent(id) {
+        getStudent(id, $('#csrf').val())
+        document.getElementById('searchResult').classList.add('hidden')
+      }
+
+
+      $(document).keydown(function (e) {
+        var token = $('#csrf').val();
+        var code = (e.keyCode ? e.keyCode : e.which);
+        if (code == 13 || code == 9)// Enter key hit
+        {
+          getStudent(barcode, token)
+          barcode = "";
+        }
+        else {
+          barcode = barcode + String.fromCharCode(code);
+
+        }
+      });
+
+      // window.addEventListener('beforeunload', (event) => {
+      //   // Cancel the event as stated by the standard.
+      //   event.preventDefault();
+      //   // Chrome requires returnValue to be set.
+      //   event.returnValue = '';
+      // });
+    </script>
+    <script>
+
+
+      $("#studentData").on("click", "#deleteBtn", function () {
+        $(this).closest("tr").remove();
+        let id = $(this).closest("tr").attr("id")
+        let i = studentsID.findIndex(obj => obj.studentId == id)
+        studentsID.splice(i, 1)
+      });
+
+      $("#studentData").on("click", "#balanceBtn", function () {
+        let id = $(this).closest("tr").attr("id")
+        swal.fire({
+          title: 'Enter Balance',
+          input: 'number',
+          inputPlaceholder: 'Enter student balance',
+          inputAttributes: {
+            maxlength: 10,
+            autocapitalize: 'off',
+            autocorrect: 'off'
+          }
+        }).then(res => {
+          if (res.isConfirmed) {
+            $.ajax({
+              type: "POST",
+              url: '/student-balance',
+              data: {
+                '_csrf': $('#csrf').val(),
+                studentID: id,
+                balance: res.value,
+              },
+              success: function () {
+
+              }
+            }).done(function (data) {
+              Swal.fire(
+                `${data.msg}`,
+                `Student balance is ${data.balance} now`,
+                'success'
+              )
+              var cell = $(`#studentData #${id}`).find('td:eq(3)').html(data.balance)
+            }).fail(function (data) {
+              Swal.fire(
+                `${data}`,
+                '',
+                'error'
+              )
+            })
+          }
+        })
+
+      });
+    </script>
+    <script>
+      $('#submitBtn').click(function (e) {
+        e.preventDefault();
+        var formURL = $(this).attr('action')
+        $.ajax({
+          type: "POST",
+          url: formURL,
+          data: {
+            '_csrf': $('#csrf').val(),
+            group: groupID,
+            students: studentsID,
+          },
+          success: function () {
+
+          }
+        }).done(function (data) {
+          window.location.reload()
+        })
+
+      });
+    </script>
+
+    </body>
+
+    </html>

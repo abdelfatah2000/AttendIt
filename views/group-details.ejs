@@ -1,0 +1,54 @@
+<%- include('./partials/head.ejs') %>
+  </head>
+
+  <body>
+    <div class="wrapper">
+      <%- include('./partials/sidebar.ejs') %>
+        <div class="main">
+          <%- include('./partials/header.ejs') %>
+        </div>
+        <div class="content">
+          <div class="main-head">
+            <h3 class="line">
+              <%= pageTitle %>
+            </h3>
+          </div>
+          <div class="main-body">
+            <table class="table table-hover" id="data-table">
+              <thead>
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Phone</th>
+                  <th scope="col">parent</th>
+                </tr>
+              </thead>
+              <tbody class="">
+                <% for( let [i, group] of groups.entries()) { %>
+                  <tr>
+                    <td>
+                      <%= i+1 %>
+                    </td>
+                    <td>
+                      <%= group.name %>
+                    </td>
+                    <td>
+                      <%= group.start %>
+                    </td>
+                    <td>
+                      <%= group.end %>
+                    </td>
+                    <td>
+                      <%= group.day %>
+                    </td>
+                  </tr>
+                  <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <%- include('./partials/end.ejs') %>
+          <script src="/js/datatables.min.js"></script>
+  </body>
+
+  </html>

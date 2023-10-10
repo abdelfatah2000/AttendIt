@@ -1,0 +1,100 @@
+<%- include('./partials/head.ejs') %>
+  <div class="wrapper">
+    <%- include('./partials/sidebar.ejs') %>
+      <div class="main">
+        <%- include('./partials/header.ejs') %>
+      </div>
+      <div class="content">
+        <div class="main-head">
+          <h3 class="line">
+            <%= pageTitle %>
+          </h3>
+        </div>
+
+        <div class="main-body">
+          <form role="form" action="/add-group" method="POST">
+            <div class="mb-3 has-validation">
+              <label for="name" class="form-label">Group Name:</label>
+              <input type="text"
+                class="form-control <%= validationErrors.find(e => e.path === 'name') ? 'is-invalid' : '' %>"
+                placeholder="Group Name" id="name" name="name" value="<% if (hasError) { %><%= group.name %><% } %>"
+                required>
+              <div class="invalid-feedback">
+                <%= validationErrors.find(e=> e.path === 'name') ? errors.msg.name : '' %>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6 has-validation">
+                <label for="time" class="form-label">Start At:</label>
+                <input type="time"
+                  class="form-control <%= validationErrors.find(e => e.path === 'start') ? 'is-invalid' : '' %>"
+                  placeholder="Start Time" id="start" name="start"
+                  value="<% if (hasError) { %><%= group.start %><% } %>" required>
+                <div class="invalid-feedback">
+                  <%= validationErrors.find(e=> e.path === 'start') ? 'Please choose a valid date' : '' %>
+                </div>
+              </div>
+              <div class="col-md-6 has-validation">
+                <label for="time" class="form-label">End At:</label>
+                <input type="time"
+                  class="form-control <%= validationErrors.find(e => e.path === 'end') ? 'is-invalid' : '' %>"
+                  placeholder="end Time" id="end" name="end" value="<% if (hasError) { %><%= group.end %><% } %>"
+                  required>
+                <div class="invalid-feedback">
+                  <%= validationErrors.find(e=> e.path === 'end') ? 'Please choose a valid date' : '' %>
+                </div>
+              </div>
+            </div>
+            <div class="mb-3 has-validation">
+              <label for="day" class="form-label">Day:</label>
+              <select id="select-country"
+                class="form-control custom-select <%= validationErrors.find(e => e.param === 'day') ? 'is-invalid' : '' %>"
+                name="day">
+                <option value="7">Saturday</option>
+                <option value="1">Sunday</option>
+                <option value="2">Monday</option>
+                <option value="3">Tuesday</option>
+                <option value="4">Wednesday</option>
+                <option value="5">Thursday</option>
+                <option value="6">Friday</option>
+              </select>
+            </div>
+            <div class="mb-3 has-validation">
+              <label for="level" class="form-label">Level:</label>
+              <select id="level"
+                class="form-control custom-select <%= validationErrors.find(e => e.param === 'level') ? 'is-invalid' : '' %>"
+                name="level">
+                <option value="First">First Level</option>
+                <option value="Second">Second Level</option>
+                <option value="Third">Third Level</option>
+              </select>
+            </div>
+
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+            <button type="submit" class="btn btn-custom" style="width: 150px; margin-left: 0; margin-top: 20px;">Add
+              Group</button>
+          </form>
+        </div>
+      </div>
+  </div>
+
+  <script type="text/javascript">
+    function msg(title, icon) {
+      new swal({
+        title,
+        icon,
+        confirmButtonColor: "#FF5856",
+        onClose: function () {
+          location.reload()
+        }
+      });
+    }
+  </script>
+  
+
+  <%- include('./partials/end.ejs') %>
+
+    </body>
+
+    </html>

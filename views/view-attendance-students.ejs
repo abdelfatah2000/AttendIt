@@ -1,0 +1,103 @@
+<%- include('./partials/head.ejs') %>
+  </head>
+
+  <body>
+    <div class="wrapper">
+      <%- include('./partials/sidebar.ejs') %>
+        <div class="main">
+          <%- include('./partials/header.ejs') %>
+        </div>
+        <div class="content">
+          <div class="main-head">
+            <h3 class="line">
+              <%= pageTitle %>
+            </h3>
+          </div>
+          <div class="main-body">
+            <% if (attendance.students.length > 0) { %>
+              <table class="table table-hover" id="data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">NO.</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Phone</th>
+                    <th scope="col">Balance</th>
+                    <th scope="col">Attendance At</th>
+                    <th scope="col">Attendance Group</th>
+                    <th scope="col"></th>
+                  </tr>
+                </thead>
+                <tbody class="">
+                  <% for( let [i, student] of attendance.students.entries() ) { %>
+                    <tr>
+                      <td><%= i+1 %></td>
+                      <td>
+                        <%= student.studentId.name %>
+                      </td>
+                      <td>
+                        <%= student.studentId.phone %>
+                      </td>
+                      <td>
+                        <%= student.studentId.balance %>
+                      </td>
+                      <td>
+                        <%= student.attendanceAt.toTimeString().split(' ')[0] %>
+                      </td>
+                      <td>
+                        <%= student.attendanceGroup.name %>
+                      </td>
+                      <td>
+                        <a href="" class="btn-primary btn btn-sm" title="View Student">
+                          <i class="fas fa-folder"></i>
+                        </a>
+                        <a href="/edit-student/<%= student.studentId._id %>" class="btn btn-info btn-sm" title="Edit Student">
+                          <i class="fas fa-edit"></i>
+                        </a>
+                      </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+              </table>
+              <% } %>
+          </div>
+        </div>
+        <%- include('./partials/end.ejs') %>
+          <script src="/js/datatables.min.js"></script>
+
+          <script>
+            $(document).ready(function () {
+              $('#data-table').DataTable({
+                "bLengthChange": false,
+                "pageLength": 9,
+                language: {
+                  'paginate': {
+                    'previous': '<span class="fa fa-chevron-left"></span>',
+                    'next': '<span class="fa fa-chevron-right"></span>'
+                  },
+                }
+              });
+            });
+          </script>
+
+          <script>
+            function submitForm(form) {
+              Swal.fire({
+                title: "Are you sure?",
+                text: "This student will be deleted",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                confirmButtonColor: '#FF5856',
+              })
+                .then(function (res) {
+                  console.log(res);
+                  if (res.isConfirmed) {
+                    form.submit();
+                  }
+                });
+              return false;
+            }
+          </script>
+  </body>
+
+  </html>

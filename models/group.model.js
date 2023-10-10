@@ -1,28 +1,34 @@
 const mongoose = require('mongoose');
 
-const studentSchema = new mongoose.Schema(
+const groupSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
     },
-    phone: {
-      type: String,
+    start: {
+      type: Number,
       required: true,
-      match: /^01[0125][0-9]{8}$/,
     },
-    parent: {
-      type: String,
+    end: {
+      type: Number,
       required: true,
-      match: /^01[0125][0-9]{8}$/,
     },
     level: {
       type: String,
       default: 'Third',
       enum: ['First', 'Second', 'Third'],
     },
+    day: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 7,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+module.exports = mongoose.model('Group', groupSchema);

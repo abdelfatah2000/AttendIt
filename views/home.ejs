@@ -1,0 +1,59 @@
+<%- include('./partials/head.ejs') %>
+  <div class="wrapper">
+    <%- include('./partials/sidebar.ejs') %>
+      <div class="main">
+        <%- include('./partials/header.ejs') %>
+      </div>
+      <div class="content home">
+        <div class="row row-cols-3 my-5 ms-5">
+          <div class="col">
+            <div class="card" style="width: 18rem; height: 8rem;">
+              <div class="card-body text-center">
+                <h3 class="card-title">First Level Student:</h3>
+                <span class="card-text fs-4 d-block">
+                  <%= students.first %>
+                </span>
+                <span class="card-text">
+                  Student
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card" style="width: 18rem; height: 8rem;">
+              <div class="card-body text-center">
+                <h3 class="card-title">Second Level Student:</h3>
+                <span class="card-text fs-4 d-block">
+                  <%= students.second %>
+                </span>
+                <span class="card-text">
+                  Student
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card" style="width: 18rem; height: 8rem;">
+              <div class="card-body text-center">
+                <h3 class="card-title">Third Level Student:</h3>
+                <span class="card-text fs-4 d-block">
+                  <%= students.third %>
+                </span>
+                <span class="card-text">
+                  Student
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="calendar" class="m-5"></div>
+      </div>
+  </div>
+  </script>
+
+  <%- include('./partials/end.ejs') %>
+    <script src="./js/calendar.js"></script>
+
+    </body>
+
+    </html>

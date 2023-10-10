@@ -1,0 +1,173 @@
+<%- include('./partials/head.ejs') %>
+  <div class="wrapper">
+    <%- include('./partials/sidebar.ejs') %>
+      <div class="main">
+        <%- include('./partials/header.ejs') %>
+      </div>
+      <div class="content">
+        <div class="main-head">
+          <h3 class="line">
+            <%= pageTitle %>
+          </h3>
+        </div>
+
+        <div class="main-body">
+          <form role="form" action="/add-student" method="POST" id="addStudent">
+            <div class="row mb-3">
+              <div class="col-sm-9 has-validation">
+                <label for="name" class="form-label">Student Name</label>
+                <input type="text" class="form-control" placeholder="Student Name" id="name" name="name" value=""
+                  required>
+                <div class="invalid-feedback" id="nameValidation">
+                </div>
+              </div>
+
+              <div class="col-3 has-validation">
+                <label for="balance" class="form-label">Student Balance</label>
+                <input type="number" class="form-control" placeholder="Student Balance" id="balance" name="balance"
+                  value="">
+                <div class="invalid-feedback" id="balanceValidation">
+
+                </div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6 has-validation">
+                <label for="phone" class="form-label">Phone</label>
+                <input type="text" class="form-control" placeholder="Phone Number" id="phone" name="phone" value=""
+                  required>
+                <div class="invalid-feedback" id="phoneValidation">
+                </div>
+              </div>
+              <div class="col-md-6 has-validation">
+                <label for="parent" class="form-label">Parent Phone</label>
+                <input type="text" class="form-control" placeholder="Parent Phone" id="parent" name="parent" value=""
+                  required>
+                <div class="invalid-feedback" id="parentValidation">
+                </div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6 has-validation">
+                <label for="level" class="form-label">Level</label>
+                <select id="level"
+                  class="form-control custom-select <%= validationErrors.find(e => e.param === 'level') ? 'is-invalid' : '' %>"
+                  name="level">
+                  <option value="">-- Select an option --</option>
+                  <option value="First">First Level</option>
+                  <option value="Second">Second Level</option>
+                  <option value="Third">Third Level</option>
+                </select>
+              </div>
+              <div class="col-md-6 has-validation">
+                <label for="group" class="form-label">Group</label>
+                <select id="group" class="form-control custom-select" name="group" disabled>
+                  <option value="">-- Select an option --</option>
+                </select>
+              </div>
+            </div>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" id="csrf">
+
+            <div class="popup hidden">
+              <div class="btn-close"></div>
+              <div class="barcode-img" id="barcode"></div>
+              <div class="btn-print">
+                <a href="#" onclick="PrintImage(''); return false;">Print</a>
+              </div>
+            </div>
+            <div class="overlay hidden"></div>
+
+            <button type="submit" class="btn btn-custom" style="width: 150px; margin-left: 0; margin-top: 20px;"
+              id="addBtn">Add
+              Student</button>
+          </form>
+        </div>
+      </div>
+  </div>
+
+  <%- include('./partials/end.ejs') %>
+    <script>
+      $(":input").keypress(function (event) {
+        if (event.which == '10' || event.which == '13') {
+          event.preventDefault();
+        }
+      });
+      $(document).ready(function () {
+        $("#level").change(function () {
+          var val = $(this).val();
+          var token = $('#csrf').val();
+          var data = {
+            level: val,
+            '_csrf': token,
+          }
+          $.ajax({
+            type: 'POST',
+            url: '/get-group-level',
+            data: data,
+            success: function (data) {
+              $('#group').prop('disabled', false);
+              document.getElementById('group').innerHTML = '<option value="">-- Select an option --</option>'
+              data.forEach(element => {
+                var select = document.getElementById('group')
+                var opt = document.createElement('option')
+                opt.value = element._id
+                opt.innerHTML = `${element.name} FROM ${element.start} TO ${element.end} IN ${element.day}`
+                select.appendChild(opt)
+              });
+            }
+          })
+        });
+        const modal = document.querySelector(".popup");
+        const overlay = document.querySelector(".overlay");
+        const closeModalBtn = document.querySelector(".btn-close");
+        $('#addBtn').click(function (e) {
+          e.preventDefault();
+          var form_data = $('#addStudent').serialize();
+          var form_url = $('#addStudent').attr("action");
+          $.ajax({
+            url: form_url,
+            type: 'POST',
+            data: form_data,
+          }).done(function (response) {
+            modal.classList.remove("hidden");
+            overlay.classList.remove("hidden");
+            let barcode = document.createElement('img')
+            barcode.src = response;
+            document.getElementById('barcode').appendChild(barcode);
+          }).fail(response => {
+            response.responseJSON.errors.forEach(item => {
+              $(`#${item.path}`).addClass('is-invalid')
+              $(`#${item.path}Validation`).html(item.msg)
+            })
+          })
+        })
+        const closeModal = function () {
+          modal.classList.add("hidden");
+          overlay.classList.add("hidden");
+          window.location = window.location.href;
+        };
+
+        closeModalBtn.addEventListener("click", closeModal);
+
+      });
+
+      function ImageToPrint(source) {
+        return "<html><head><scri" + "pt>function step1(){\n" +
+          "setTimeout('step2()', 10);}\n" +
+          "function step2(){window.print();window.close()}\n" +
+          "</scri" + "pt></head><body onload='step1()'>\n" +
+          "<img src='" + source + "' /></body></html>";
+      }
+
+      function PrintImage(source) {
+        var Pagelink = "about:blank";
+        var pwa = window.open(Pagelink, "_new");
+        pwa.document.open();
+        pwa.document.write(ImageToPrint(source));
+        pwa.document.close();
+      }
+
+    </script>
+    </body>
+
+    </html>
