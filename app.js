@@ -5,11 +5,13 @@ const connection = require('./config/db');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
+const mongoSanitize = require('express-mongo-sanitize');
 const errorController = require('./controllers/errors');
+
+
 
 // Define .env file
 require('dotenv').config();
-
 
 const store = new MongoDBStore({
   uri: process.env.CONNECTION_STRING,
@@ -36,6 +38,8 @@ const csrfProtection = csrf();
 app.use(express.json({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(mongoSanitize());
+
 
 // Routes
 const studentRoutes = require('./routes/student.routes');
@@ -50,8 +54,8 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-  console.log(req.body);
-  res.send('Hello World!');
+  console.log("HI")
+  res.redirect('/home');
 });
 
 app.use(studentRoutes);

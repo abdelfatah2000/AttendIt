@@ -47,9 +47,6 @@
                         <%= student.attendanceGroup.name %>
                       </td>
                       <td>
-                        <a href="" class="btn-primary btn btn-sm" title="View Student">
-                          <i class="fas fa-folder"></i>
-                        </a>
                         <a href="/edit-student/<%= student.studentId._id %>" class="btn btn-info btn-sm" title="Edit Student">
                           <i class="fas fa-edit"></i>
                         </a>
@@ -63,7 +60,9 @@
         </div>
         <%- include('./partials/end.ejs') %>
           <script src="/js/datatables.min.js"></script>
-
+          <script src="/js/dataTables.buttons.min.js"></script>
+          <script src="/js/buttons.html5.min.js"></script>
+          <script src="/js/jszip.min.js"></script>
           <script>
             $(document).ready(function () {
               $('#data-table').DataTable({
@@ -74,7 +73,11 @@
                     'previous': '<span class="fa fa-chevron-left"></span>',
                     'next': '<span class="fa fa-chevron-right"></span>'
                   },
-                }
+                },
+                dom: 'Bfrtip',
+                buttons: [
+                  'excelHtml5',
+                ]
               });
             });
           </script>

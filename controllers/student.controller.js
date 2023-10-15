@@ -1,7 +1,7 @@
 const Student = require('../models/student.model');
 const Group = require('../models/group.model');
 const { validationResult } = require('express-validator');
-const { Canvas } = require('canvas');
+// const { Canvas } = require('canvas');
 const JsBarcode = require('jsbarcode');
 const moment = require('moment');
 
@@ -11,18 +11,18 @@ const convertSecondsToTime = (seconds) => {
   return time;
 };
 
-const generateBarCode = (id) => {
-  const canvas = new Canvas();
-  JsBarcode(canvas, id, {
-    lineColor: '#000',
-    width: 2,
-    height: 100,
-    displayValue: true,
-  });
-  canvas.toDataURL('image/png', (err, png) => {
-    return png;
-  });
-};
+// const generateBarCode = (id) => {
+//   const canvas = new Canvas();
+//   JsBarcode(canvas, id, {
+//     lineColor: '#000',
+//     width: 2,
+//     height: 100,
+//     displayValue: true,
+//   });
+//   canvas.toDataURL('image/png', (err, png) => {
+//     return png;
+//   });
+// };
 
 const days = [
   '',
@@ -49,22 +49,6 @@ exports.postAddStudent = (req, res, next) => {
   const errors = validationResult(req);
   console.log(errors.mapped());
   if (!errors.isEmpty()) {
-    // return res.status(400).render('add-student', {
-    //   path: '/add-student',
-    //   pageTitle: 'Add Student',
-    //   hasError: true,
-    //   student: {
-    //     name: req.body.name,
-    //     phone: req.body.phone,
-    //     parent: req.body.parent,
-    //     level: req.body.level,
-    //     group: req.body.group,
-    //     balance: req.body.balance,
-    //   },
-    //   errors: errors.mapped(),
-    //   validationErrors: errors.array(),
-    // });
-
     return res.status(400).json(errors);
   }
   const student = new Student({
@@ -79,7 +63,7 @@ exports.postAddStudent = (req, res, next) => {
     .save()
     .then((result) => {
       console.log('Student Created');
-      res.json(generateBarCode(result._id));
+      res.redirect('/add-student');
     })
     .catch((err) => {
       const error = new Error(err);
@@ -117,40 +101,39 @@ exports.deleteStudent = (req, res, next) => {
 };
 
 exports.getEditStudent = (req, res, next) => {
-  Student.findById(req.params.studentId)
-    .then((student) => {
-      console.log(student)
-      Group.find({ level: student.level })
-        .then((groups) => {
-          let arr = [];
-          groups.forEach((item) => {
-            arr.push({
-              _id: item._id,
-              name: item.name,
-              start: convertSecondsToTime(item.start),
-              end: convertSecondsToTime(item.end),
-              day: days[item.day],
-            });
+  Student.findById(req.params.studentId).then((student) => {
+    console.log(student);
+    Group.find({ level: student.level })
+      .then((groups) => {
+        let arr = [];
+        groups.forEach((item) => {
+          arr.push({
+            _id: item._id,
+            name: item.name,
+            start: convertSecondsToTime(item.start),
+            end: convertSecondsToTime(item.end),
+            day: days[item.day],
           });
-          res.render('edit-student', {
-            path: `/view-students/${student.level}`,
-            student,
-            groups: arr,
-            pageTitle: 'Edit Student',
-            validationErrors: [],
-          });
-        })
-        .catch((err) => {
-          const error = new Error(err);
-          error.httpStatusCode = 500;
-          return next(error);
         });
-    })
-//     .catch((err) => {
-//       const error = new Error(err);
-//       error.httpStatusCode = 500;
-//       return next(error);
-//     });
+        res.render('edit-student', {
+          path: `/view-students/${student.level}`,
+          student,
+          groups: arr,
+          pageTitle: 'Edit Student',
+          validationErrors: [],
+        });
+      })
+      .catch((err) => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      });
+  });
+  //     .catch((err) => {
+  //       const error = new Error(err);
+  //       error.httpStatusCode = 500;
+  //       return next(error);
+  //     });
 };
 
 exports.postEditStudent = (req, res, next) => {
